@@ -28,12 +28,20 @@
         .st-none { background: #fee2e2; color: #991b1b; }
         .progress-bar-bg { width: 120px; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .progress-bar-fill { height: 100%; transition: 0.6s; }
-        .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 20px; }
-        .task-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
+        .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-top: 20px; }
+        .task-card { background: white; border: 1px solid #e2e8f0; padding: 12px; border-radius: 15px; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
         .task-card.active { border-color: var(--success); background: #ecfdf5; }
+        .task-content { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-grow: 1; }
+        .task-actions { display: flex; gap: 8px; opacity: 0.3; transition: 0.3s; }
+        .task-card:hover .task-actions { opacity: 1; }
         .btn { padding: 10px 24px; border-radius: 14px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: #f1f5f9; color: #475569; font-size: 0.8rem; }
+        .evidence-list { margin-top: 15px; padding: 15px; background: #f1f5f9; border-radius: 18px; border: 1px solid #e2e8f0; }
+        .evidence-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+        .action-btn { cursor: pointer; padding: 5px; color: #94a3b8; transition: 0.2s; }
+        .action-btn:hover { color: var(--danger); }
+        .edit-btn:hover { color: var(--warning); }
     </style>
 </head>
 <body>
@@ -41,7 +49,7 @@
 <header>
     <div>
         <h1 style="margin:0; font-size:1.6rem; font-weight:900; color:var(--primary)">مدرسة أسيد بن حضير</h1>
-        <small><i class="fas fa-cloud-upload-alt"></i> نظام التقييم الذاتي المتصل سحابياً</small>
+        <small><i class="fas fa-cloud-upload-alt"></i> نظام التقييم الذاتي - تحكم كامل</small>
     </div>
     <button class="btn btn-primary" onclick="addDomain()"><i class="fas fa-folder-plus"></i> إضافة مجال تقييم</button>
 </header>
@@ -53,7 +61,7 @@
             <p style="margin-top:10px; font-weight:700; color:#64748b">مستوى الأداء العام</p>
         </div>
         <div class="stat-card sub-stats">
-            <div class="sub-stat-box"><small>مؤشرات مكتملة</small><h2 id="c-done" style="color:var(--success); margin:5px 0">0</h2></div>
+            <div class="sub-stat-box"><small>مكتملة</small><h2 id="c-done" style="color:var(--success); margin:5px 0">0</h2></div>
             <div class="sub-stat-box"><small>جاري العمل</small><h2 id="c-work" style="color:var(--warning); margin:5px 0">0</h2></div>
             <div class="sub-stat-box"><small>غير مكتملة</small><h2 id="c-none" style="color:var(--danger); margin:5px 0">0</h2></div>
         </div>
@@ -62,11 +70,9 @@
 </div>
 
 <script type="module">
-    // استدعاء Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
 
-    // بياناتك الخاصة من الصور السابقة
     const firebaseConfig = {
         apiKey: "AIzaSyAuD5HW9lusc4RuaHuVeiHC5YP4KMO5klo",
         authDomain: "excellencegate-99f89.firebaseapp.com",
@@ -74,17 +80,15 @@
         storageBucket: "excellencegate-99f89.firebasestorage.app",
         messagingSenderId: "1031127698735",
         appId: "1:1031127698735:web:04976917d5017d2b2265da",
-        databaseURL: "https://excellencegate-99f89-default-rtdb.firebaseio.com" // رابط القاعدة من صورتك الأخيرة
+        databaseURL: "https://excellencegate-99f89-default-rtdb.firebaseio.com"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const dbRef = ref(db, 'school_data');
 
-    // الحالة الافتراضية للتطبيق[cite: 1]
     window.appState = { domains: [], expandedIds: [] };
 
-    // --- الربط مع السحابة ---
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -93,30 +97,10 @@
         }
     });
 
-    // --- دوال التحكم (Global) ---
-    window.save = function() {
-        set(dbRef, window.appState);
-    };
+    window.save = () => set(dbRef, window.appState);
 
-    window.addDomain = function() {
-        const t = prompt("أدخل مسمى المجال:");
-        if (t) {
-            if (!window.appState.domains) window.appState.domains = [];
-            window.appState.domains.push({ title: t, kpis: [] });
-            save();
-        }
-    };
-
-    window.addKPI = function(dIdx) {
-        const n = prompt("أدخل مسمى المؤشر:");
-        if (n) {
-            if (!window.appState.domains[dIdx].kpis) window.appState.domains[dIdx].kpis = [];
-            window.appState.domains[dIdx].kpis.push({ name: n, tasks: [], manualStatus: null });
-            save();
-        }
-    };
-
-    window.addTask = function(dIdx, kIdx) {
+    // --- إدارة المهام (Tasks) الجديدة ---
+    window.addTask = (dIdx, kIdx) => {
         const txt = prompt("أدخل المهمة المطلوبة:");
         if (txt) {
             if (!window.appState.domains[dIdx].kpis[kIdx].tasks) window.appState.domains[dIdx].kpis[kIdx].tasks = [];
@@ -125,36 +109,77 @@
         }
     };
 
-    window.toggleTask = function(dIdx, kIdx, tIdx) {
+    window.editTask = (dIdx, kIdx, tIdx) => {
+        const oldText = window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].text;
+        const newText = prompt("تعديل نص المهمة:", oldText);
+        if (newText && newText !== oldText) {
+            window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].text = newText;
+            save();
+        }
+    };
+
+    window.deleteTask = (dIdx, kIdx, tIdx) => {
+        if(confirm("هل تريد حذف هذه المهمة؟")) {
+            window.appState.domains[dIdx].kpis[kIdx].tasks.splice(tIdx, 1);
+            save();
+        }
+    };
+
+    // --- بقية الدوال السابقة ---
+    window.addDomain = () => {
+        const t = prompt("أدخل مسمى المجال:");
+        if (t) {
+            if (!window.appState.domains) window.appState.domains = [];
+            window.appState.domains.push({ title: t, kpis: [] });
+            save();
+        }
+    };
+
+    window.editDomain = (dIdx) => {
+        const n = prompt("تعديل اسم المجال:", window.appState.domains[dIdx].title);
+        if(n) { window.appState.domains[dIdx].title = n; save(); }
+    };
+
+    window.deleteDomain = (dIdx) => {
+        if(confirm("حذف المجال بالكامل؟")) { window.appState.domains.splice(dIdx, 1); save(); }
+    };
+
+    window.addKPI = (dIdx) => {
+        const n = prompt("أدخل مسمى المؤشر:");
+        if (n) {
+            if (!window.appState.domains[dIdx].kpis) window.appState.domains[dIdx].kpis = [];
+            window.appState.domains[dIdx].kpis.push({ name: n, tasks: [], evidence: [], manualStatus: null });
+            save();
+        }
+    };
+
+    window.addEvidence = (dIdx, kIdx) => {
+        const name = prompt("مسمى الشاهد:");
+        const url = prompt("رابط Google Drive:");
+        if (name && url) {
+            if (!window.appState.domains[dIdx].kpis[kIdx].evidence) window.appState.domains[dIdx].kpis[kIdx].evidence = [];
+            window.appState.domains[dIdx].kpis[kIdx].evidence.push({ name, url });
+            save();
+        }
+    };
+
+    window.toggleTask = (dIdx, kIdx, tIdx) => {
         window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].done = !window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].done;
-        window.appState.domains[dIdx].kpis[kIdx].manualStatus = null;
         save();
     };
 
-    window.setStatus = function(dIdx, kIdx, status) {
-        window.appState.domains[dIdx].kpis[kIdx].manualStatus = status;
-        save();
-    };
+    window.setStatus = (dIdx, kIdx, s) => { window.appState.domains[dIdx].kpis[kIdx].manualStatus = s; save(); };
 
-    window.toggleView = function(id) {
+    window.toggleView = (id) => {
         if (!window.appState.expandedIds) window.appState.expandedIds = [];
-        const index = window.appState.expandedIds.indexOf(id);
-        if (index > -1) window.appState.expandedIds.splice(index, 1);
+        const idx = window.appState.expandedIds.indexOf(id);
+        if (idx > -1) window.appState.expandedIds.splice(idx, 1);
         else window.appState.expandedIds.push(id);
         save();
     };
 
-    window.deleteKPI = function(dIdx, kIdx) {
-        if(confirm('هل أنت متأكد من حذف هذا المؤشر؟')) {
-            window.appState.domains[dIdx].kpis.splice(kIdx, 1);
-            save();
-        }
-    }
-
-    // --- دالة الرسم (Render)[cite: 1] ---
-    window.render = function() {
+    window.render = () => {
         const root = document.getElementById('app-root');
-        if (!root) return;
         root.innerHTML = '';
         let stats = { total: 0, sum: 0, done: 0, work: 0, none: 0 };
 
@@ -164,7 +189,11 @@
             let html = `
                 <div class="domain-wrapper">
                     <div class="domain-header">
-                        <div class="domain-title"><i class="fas fa-layer-group"></i> ${dom.title}</div>
+                        <div class="domain-title">
+                            <i class="fas fa-layer-group"></i> ${dom.title}
+                            <i class="fas fa-edit action-btn edit-btn" style="font-size:0.9rem" onclick="editDomain(${dIdx})"></i>
+                            <i class="fas fa-trash action-btn" style="font-size:0.9rem" onclick="deleteDomain(${dIdx})"></i>
+                        </div>
                         <button class="btn btn-secondary" onclick="addKPI(${dIdx})">+ مؤشر جديد</button>
                     </div>
             `;
@@ -173,15 +202,12 @@
                 dom.kpis.forEach((kpi, kIdx) => {
                     stats.total++;
                     const tasks = kpi.tasks || [];
-                    const tCount = tasks.length;
+                    const evidence = kpi.evidence || [];
                     const dCount = tasks.filter(t => t.done).length;
-                    const autoPerc = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
-                    
+                    const autoPerc = tasks.length > 0 ? Math.round((dCount / tasks.length) * 100) : 0;
                     let curStatus = kpi.manualStatus || (autoPerc === 100 ? 'done' : (autoPerc > 0 ? 'work' : 'none'));
                     const finalPerc = curStatus === 'done' ? 100 : (curStatus === 'work' ? Math.max(autoPerc, 50) : 0);
-                    
-                    stats.sum += finalPerc;
-                    stats[curStatus]++;
+                    stats.sum += finalPerc; stats[curStatus]++;
 
                     const kId = `k-${dIdx}-${kIdx}`;
                     const isOpen = (window.appState.expandedIds || []).includes(kId);
@@ -191,47 +217,42 @@
                             <div class="kpi-main" onclick="toggleView('${kId}')">
                                 <i class="fas fa-chevron-${isOpen?'up':'down'}" style="color:#94a3b8"></i>
                                 <div style="font-weight:700;">${kpi.name}</div>
-                                <div class="progress-bar-bg">
-                                    <div class="progress-bar-fill" style="width:${autoPerc}%; background:${autoPerc===100?'var(--success)':'var(--primary)'}"></div>
-                                </div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${autoPerc}%; background:var(--primary)"></div></div>
                                 <div style="font-weight:900; color:var(--primary)">${finalPerc}%</div>
-                                <div class="status-badge st-${curStatus}">
-                                    ${curStatus==='done'?'مكتملة':(curStatus==='work'?'جاري العمل':'غير مكتملة')}
-                                </div>
+                                <div class="status-badge st-${curStatus}">${curStatus==='done'?'مكتملة':(curStatus==='work'?'جاري':'بدون')}</div>
                             </div>
                             <div class="kpi-details" style="display:${isOpen?'block':'none'}">
-                                <div style="margin-top:20px; display:flex; gap:10px; align-items:center;">
-                                    <small style="font-weight:700">تغيير الحالة يدوياً:</small>
-                                    <button class="status-badge st-done" onclick="setStatus(${dIdx}, ${kIdx}, 'done')">مكتملة</button>
-                                    <button class="status-badge st-work" onclick="setStatus(${dIdx}, ${kIdx}, 'work')">جاري العمل</button>
-                                    <button class="status-badge st-none" onclick="setStatus(${dIdx}, ${kIdx}, 'none')">غير مكتملة</button>
+                                <div style="display:flex; gap:10px; margin:15px 0;">
+                                    <button class="btn btn-secondary" onclick="addEvidence(${dIdx}, ${kIdx})"><i class="fas fa-paperclip"></i> إضافة شاهد (Drive)</button>
                                 </div>
+                                ${evidence.length?`<div class="evidence-list"><small><b>الشواهد:</b></small>${evidence.map((e,ei)=>`<div class="evidence-item"><a href="${e.url}" target="_blank">${e.name}</a><i class="fas fa-times action-btn" onclick="window.appState.domains[${dIdx}].kpis[${kIdx}].evidence.splice(${ei},1);save()"></i></div>`).join('')}</div>`:''}
                                 <div class="tasks-grid">
                                     ${tasks.map((t, tIdx) => `
-                                        <div class="task-card ${t.done?'active':''}" onclick="toggleTask(${dIdx}, ${kIdx}, ${tIdx})">
-                                            <i class="${t.done?'fas fa-check-circle':'far fa-circle'}"></i>
-                                            <span>${t.text}</span>
+                                        <div class="task-card ${t.done?'active':''}">
+                                            <div class="task-content" onclick="toggleTask(${dIdx}, ${kIdx}, ${tIdx})">
+                                                <i class="${t.done?'fas fa-check-circle':'far fa-circle'}"></i>
+                                                <span>${t.text}</span>
+                                            </div>
+                                            <div class="task-actions">
+                                                <i class="fas fa-pen action-btn edit-btn" style="font-size:0.8rem" onclick="editTask(${dIdx}, ${kIdx}, ${tIdx})"></i>
+                                                <i class="fas fa-trash action-btn" style="font-size:0.8rem" onclick="deleteTask(${dIdx}, ${kIdx}, ${tIdx})"></i>
+                                            </div>
                                         </div>
                                     `).join('')}
-                                    <div class="task-card" style="border:1px dashed var(--primary); color:var(--primary); justify-content:center" onclick="addTask(${dIdx}, ${kIdx})">
+                                    <div class="task-card" style="border:1px dashed var(--primary); color:var(--primary); justify-content:center; cursor:pointer" onclick="addTask(${dIdx}, ${kIdx})">
                                         <i class="fas fa-plus-circle"></i> إضافة مهمة
                                     </div>
                                 </div>
-                                <button class="btn" style="color:var(--danger); margin-top:15px; font-size:0.7rem" onclick="deleteKPI(${dIdx},${kIdx})">حذف المؤشر</button>
                             </div>
                         </div>
                     `;
                 });
             }
-            html += `</div>`;
-            root.innerHTML += html;
+            html += `</div>`; root.innerHTML += html;
         });
-
         document.getElementById('total-perc').innerText = (stats.total ? Math.round(stats.sum / stats.total) : 0) + '%';
-        document.getElementById('c-done').innerText = stats.done;
-        document.getElementById('c-work').innerText = stats.work;
-        document.getElementById('c-none').innerText = stats.none;
-    }
+        document.getElementById('c-done').innerText = stats.done; document.getElementById('c-work').innerText = stats.work; document.getElementById('c-none').innerText = stats.none;
+    };
 </script>
 </body>
 </html>
