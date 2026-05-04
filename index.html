@@ -3,79 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة التميز 2.0 - مدرسة أسيد بن حضير</title>
-    <!-- دعم الجوال PWA -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>بوابة التميز - مدرسة أسيد بن حضير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #0369a1; --success: #059669; --warning: #d97706; --danger: #dc2626; --bg: #f1f5f9; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; color: #1e293b; transition: 0.3s; }
+        :root { --primary: #0369a1; --success: #059669; --warning: #d97706; --danger: #dc2626; --bg: #f8fafc; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 100px; color: #334155; }
+        header { background: white; padding: 20px 8%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
         
-        /* الهيدر المطور */
-        header { background: linear-gradient(135deg, #0369a1, #075985); color: white; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; border-bottom: 3px solid #fbbf24; }
-        
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        
-        /* لوحة الرسوم البيانية */
-        .analytics-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 40px; }
-        .chart-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-
         /* شريط البحث */
-        .search-box { width: 100%; padding: 15px 25px; border-radius: 15px; border: 2px solid #e2e8f0; margin-bottom: 25px; font-family: inherit; font-size: 1rem; outline: none; transition: 0.3s; }
-        .search-box:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(3,105,161,0.1); }
+        .search-container { margin-bottom: 30px; }
+        .search-input { width: 100%; padding: 15px 25px; border-radius: 15px; border: 2px solid #e2e8f0; font-family: inherit; font-size: 1rem; outline: none; transition: 0.3s; }
+        .search-input:focus { border-color: var(--primary); }
 
-        .domain-card { background: white; border-radius: 25px; padding: 30px; margin-bottom: 30px; border-right: 8px solid var(--primary); }
-        .kpi-row { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 15px; margin-top: 15px; padding: 15px; transition: 0.2s; }
-        .kpi-row:hover { background: #fff; transform: translateY(-2px); }
+        .dashboard { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; margin-bottom: 50px; }
+        .stat-card { background: white; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); text-align: center; border: 1px solid #e2e8f0; }
+        .stat-main-text { font-size: 3rem; font-weight: 900; color: var(--primary); line-height: 1; }
+        .sub-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .sub-stat-box { padding: 15px; border-radius: 20px; background: #fff; border: 1px solid #f1f5f9; }
 
-        .btn { padding: 10px 20px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; }
-        .btn-add { background: #fbbf24; color: #78350f; }
-        .btn-main { background: var(--primary); color: white; }
+        .domain-wrapper { background: white; border-radius: 35px; padding: 35px; margin-bottom: 45px; border: 1px solid #e0f2fe; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .domain-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .domain-title { font-size: 1.5rem; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 12px; }
         
-        .task-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 12px; border-radius: 12px; margin-top: 8px; border: 1px solid #cbd5e1; }
-        .task-text { flex: 1; cursor: pointer; padding: 0 10px; }
-        .completed { text-decoration: line-through; color: #94a3b8; }
+        .kpi-item { background: white; border-radius: 20px; margin-bottom: 15px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .kpi-main { padding: 20px 25px; display: grid; grid-template-columns: 40px 1fr auto auto auto; align-items: center; gap: 20px; cursor: pointer; }
+        .kpi-details { padding: 25px; display: none; border-top: 1px dashed #e2e8f0; background: #fafbfc; }
         
-        .action-btns i { cursor: pointer; margin-left: 10px; transition: 0.2s; }
-        .fa-trash-alt:hover { color: var(--danger); }
-        .fa-edit:hover { color: var(--warning); }
+        .status-badge { padding: 8px 16px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; }
+        .st-done { background: #d1fae5; color: #064e3b; }
+        .st-work { background: #fef3c7; color: #92400e; }
+        .st-none { background: #fee2e2; color: #991b1b; }
+
+        .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-top: 20px; }
+        .task-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 18px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; }
+        .task-card.active { border-color: var(--success); background: #f0fdf4; }
+        
+        .evidence-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+        .evidence-link { display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; color: var(--primary); padding: 8px 15px; border-radius: 10px; text-decoration: none; font-weight: 600; margin-left: 10px; margin-bottom: 10px; }
+
+        .btn { padding: 10px 24px; border-radius: 14px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: #f1f5f9; color: #475569; font-size: 0.8rem; }
+        .action-icon { cursor: pointer; color: #94a3b8; transition: 0.2s; padding: 5px; }
+        .action-icon:hover { color: var(--danger); transform: scale(1.1); }
+        .edit-icon:hover { color: var(--warning); }
     </style>
 </head>
 <body>
 
 <header>
     <div>
-        <h1 style="margin:0; font-size:1.8rem; font-weight:900">بوابة التميز 2.0</h1>
-        <small><i class="fas fa-school"></i> مدرسة أسيد بن حضير - لوحة التحكم الذكية</small>
+        <h1 style="margin:0; font-size:1.6rem; font-weight:900; color:var(--primary)">بوابة التميز</h1>
+        <small><i class="fas fa-school"></i> مدرسة أسيد بن حضير</small>
     </div>
-    <div style="display:flex; gap:10px">
-        <button class="btn btn-add" onclick="addDomain()"><i class="fas fa-plus"></i> مجال جديد</button>
-        <button class="btn btn-main" onclick="window.print()"><i class="fas fa-file-pdf"></i> تصدير تقرير</button>
-    </div>
+    <button class="btn btn-primary" onclick="addDomain()"><i class="fas fa-plus"></i> إضافة مجال جديد</button>
 </header>
 
 <div class="container">
-    <!-- الرسوم البيانية -->
-    <div class="analytics-grid">
-        <div class="chart-card">
-            <h3 style="margin-top:0">نسبة الإنجاز العام</h3>
-            <canvas id="mainChart"></canvas>
+    <!-- شريط البحث الفوري -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="ابحث عن مؤشر أو خطة عمل..." oninput="render()">
+    </div>
+
+    <!-- لوحة الإحصائيات -->
+    <div class="dashboard">
+        <div class="stat-card">
+            <div class="stat-main-text" id="total-perc">0%</div>
+            <p style="margin-top:10px; font-weight:700; color:#64748b">مستوى الأداء العام</p>
         </div>
-        <div class="chart-card">
-            <h3 style="margin-top:0">إحصائيات المهام</h3>
-            <div id="statsBoxes" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-top:40px; text-align:center">
-                <!-- تعبأ برمجياً -->
-            </div>
+        <div class="stat-card sub-stats">
+            <div class="sub-stat-box"><small>مكتملة</small><h2 id="c-done" style="color:var(--success); margin:5px 0">0</h2></div>
+            <div class="sub-stat-box"><small>جاري العمل</small><h2 id="c-work" style="color:var(--warning); margin:5px 0">0</h2></div>
+            <div class="sub-stat-box"><small>بدون مهام</small><h2 id="c-none" style="color:var(--danger); margin:5px 0">0</h2></div>
         </div>
     </div>
 
-    <!-- البحث -->
-    <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن مجال، مؤشر، أو خطة عمل..." oninput="render()">
-
-    <div id="app"></div>
+    <div id="app-root"></div>
 </div>
 
 <script type="module">
@@ -96,135 +101,152 @@
     const db = getDatabase(app);
     const dbRef = ref(db, 'school_data');
 
-    let state = { domains: [] };
-    let myChart = null;
+    window.appState = { domains: [], expandedIds: [] };
 
     onValue(dbRef, (snap) => {
-        if (snap.val()) {
-            state = snap.val();
-            render();
-            updateCharts();
-        }
+        if (snap.val()) { window.appState = snap.val(); render(); }
     });
 
-    const save = () => set(dbRef, state);
+    window.save = () => set(dbRef, window.appState);
 
-    // --- وظائف التحكم ---
+    // --- العمليات ---
     window.addDomain = () => {
-        const title = prompt("اسم المجال الجديد:");
-        if (title) { state.domains.push({ title, kpis: [] }); save(); }
+        const t = prompt("مسمى المجال:");
+        if(t) { if(!window.appState.domains) window.appState.domains = []; window.appState.domains.push({title:t, kpis:[]}); save(); }
     };
 
     window.addKPI = (dIdx) => {
-        const name = prompt("اسم المؤشر:");
-        if (name) { state.domains[dIdx].kpis.push({ name, tasks: [] }); save(); }
+        const n = prompt("مسمى المؤشر:");
+        if(n) { window.appState.domains[dIdx].kpis.push({name:n, tasks:[], evidence:[]}); save(); }
     };
 
     window.addTask = (dIdx, kIdx) => {
-        const text = prompt("أدخل المهمة/الخطة:");
-        if (text) { 
-            if (!state.domains[dIdx].kpis[kIdx].tasks) state.domains[dIdx].kpis[kIdx].tasks = [];
-            state.domains[dIdx].kpis[kIdx].tasks.push({ text, done: false }); 
+        const txt = prompt("أدخل مسمى المهمة/الخطة:");
+        if(txt) { 
+            if(!window.appState.domains[dIdx].kpis[kIdx].tasks) window.appState.domains[dIdx].kpis[kIdx].tasks = [];
+            window.appState.domains[dIdx].kpis[kIdx].tasks.push({text:txt, done:false}); 
             save(); 
         }
     };
 
-    window.toggleTask = (dIdx, kIdx, tIdx) => {
-        state.domains[dIdx].kpis[kIdx].tasks[tIdx].done = !state.domains[dIdx].kpis[kIdx].tasks[tIdx].done;
-        save();
+    window.editTask = (dIdx, kIdx, tIdx) => {
+        const old = window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].text;
+        const n = prompt("تعديل الخطة:", old);
+        if(n) { window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].text = n; save(); }
     };
 
     window.deleteTask = (dIdx, kIdx, tIdx) => {
-        if(confirm("حذف هذه الخطة؟")) { state.domains[dIdx].kpis[kIdx].tasks.splice(tIdx, 1); save(); }
+        if(confirm("حذف هذه المهمة؟")) { window.appState.domains[dIdx].kpis[kIdx].tasks.splice(tIdx, 1); save(); }
     };
 
-    // --- وظيفة البحث والرسم ---
-    function render() {
-        const container = document.getElementById('app');
+    window.toggleTask = (dIdx, kIdx, tIdx) => {
+        window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].done = !window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].done;
+        save();
+    };
+
+    window.addEvidence = (dIdx, kIdx) => {
+        const url = prompt("الصق رابط الشاهد (Google Drive مثلاً):");
+        const title = prompt("مسمى الشاهد (مثلاً: صور الدورة):");
+        if(url && title) {
+            if(!window.appState.domains[dIdx].kpis[kIdx].evidence) window.appState.domains[dIdx].kpis[kIdx].evidence = [];
+            window.appState.domains[dIdx].kpis[kIdx].evidence.push({title, url});
+            save();
+        }
+    };
+
+    window.toggleView = (id) => {
+        if(!window.appState.expandedIds) window.appState.expandedIds = [];
+        const idx = window.appState.expandedIds.indexOf(id);
+        if(idx > -1) window.appState.expandedIds.splice(idx, 1);
+        else window.appState.expandedIds.push(id);
+        save();
+    };
+
+    window.render = () => {
+        const root = document.getElementById('app-root');
         const query = document.getElementById('searchInput').value.toLowerCase();
-        container.innerHTML = '';
+        root.innerHTML = '';
+        let stats = { total:0, sum:0, done:0, work:0, none:0 };
 
-        state.domains.forEach((dom, dIdx) => {
-            if (!dom.title.toLowerCase().includes(query) && !JSON.stringify(dom.kpis).toLowerCase().includes(query)) return;
+        if(!window.appState.domains) return;
 
+        window.appState.domains.forEach((dom, dIdx) => {
             let domHtml = `
-                <div class="domain-card">
-                    <h2 style="margin-top:0; color:var(--primary)">${dom.title}</h2>
-                    <button class="btn btn-main" onclick="addKPI(${dIdx})">+ إضافة مؤشر</button>
-                    <div class="kpis-list">
+                <div class="domain-wrapper">
+                    <div class="domain-header">
+                        <div class="domain-title"><i class="fas fa-folder"></i> ${dom.title}</div>
+                        <button class="btn btn-secondary" onclick="addKPI(${dIdx})">+ إضافة مؤشر</button>
+                    </div>
             `;
 
             dom.kpis.forEach((kpi, kIdx) => {
+                if(query && !kpi.name.toLowerCase().includes(query)) return;
+                
+                stats.total++;
                 const tasks = kpi.tasks || [];
                 const doneCount = tasks.filter(t => t.done).length;
                 const perc = tasks.length ? Math.round((doneCount/tasks.length)*100) : 0;
+                
+                stats.sum += perc;
+                if(perc === 100) stats.done++;
+                else if(perc > 0) stats.work++;
+                else stats.none++;
+
+                const kId = `k-${dIdx}-${kIdx}`;
+                const isOpen = (window.appState.expandedIds || []).includes(kId);
 
                 domHtml += `
-                    <div class="kpi-row">
-                        <div style="display:flex; justify-content:space-between; align-items:center">
-                            <h4 style="margin:0">${kpi.name}</h4>
-                            <span style="font-weight:900; color:var(--primary)">${perc}%</span>
+                    <div class="kpi-item">
+                        <div class="kpi-main" onclick="toggleView('${kId}')">
+                            <i class="fas fa-chevron-${isOpen?'up':'down'}"></i>
+                            <div style="font-weight:700">${kpi.name}</div>
+                            <div style="font-weight:900; color:var(--primary)">${perc}%</div>
+                            <div class="status-badge ${perc===100?'st-done':(perc>0?'st-work':'st-none')}">
+                                ${perc===100?'مكتمل':(perc>0?'جاري':'مطلوب')}
+                            </div>
                         </div>
-                        <div style="background:#e2e8f0; height:8px; border-radius:10px; margin:10px 0">
-                            <div style="width:${perc}%; background:var(--success); height:100%; border-radius:10px; transition:0.5s"></div>
-                        </div>
-                        <div class="tasks-area">
-                            ${tasks.map((t, tIdx) => `
-                                <div class="task-item">
-                                    <div class="task-text ${t.done?'completed':''}" onclick="toggleTask(${dIdx}, ${kIdx}, ${tIdx})">
-                                        <i class="${t.done?'fas fa-check-square':'far fa-square'}"></i> ${t.text}
+                        <div class="kpi-details" style="display:${isOpen?'block':'none'}">
+                            <div class="tasks-grid">
+                                ${tasks.map((t, tIdx) => `
+                                    <div class="task-card ${t.done?'active':''}">
+                                        <div style="cursor:pointer; flex:1" onclick="toggleTask(${dIdx}, ${kIdx}, ${tIdx})">
+                                            <i class="${t.done?'fas fa-check-circle':'far fa-circle'}"></i> ${t.text}
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-pen action-icon edit-icon" onclick="editTask(${dIdx}, ${kIdx}, ${tIdx})"></i>
+                                            <i class="fas fa-trash-alt action-icon" onclick="deleteTask(${dIdx}, ${kIdx}, ${tIdx})"></i>
+                                        </div>
                                     </div>
-                                    <div class="action-btns">
-                                        <i class="fas fa-trash-alt" onclick="deleteTask(${dIdx}, ${kIdx}, ${tIdx})"></i>
-                                    </div>
+                                `).join('')}
+                                <div class="task-card" style="border:2px dashed var(--primary); color:var(--primary); justify-content:center; cursor:pointer" onclick="addTask(${dIdx}, ${kIdx})">
+                                    + إضافة مهمة (خطة)
                                 </div>
-                            `).join('')}
-                            <div style="margin-top:10px; color:var(--primary); cursor:pointer; font-weight:700" onclick="addTask(${dIdx}, ${kIdx})">+ إضافة خطة عمل</div>
+                            </div>
+                            
+                            <div class="evidence-section">
+                                <h5 style="margin-top:0"><i class="fas fa-paperclip"></i> الشواهد والأدلة:</h5>
+                                ${(kpi.evidence || []).map(ev => `
+                                    <a href="${ev.url}" target="_blank" class="evidence-link">
+                                        <i class="fab fa-google-drive"></i> ${ev.title}
+                                    </a>
+                                `).join('')}
+                                <button class="btn btn-secondary" onclick="addEvidence(${dIdx}, ${kIdx})" style="margin-top:10px">
+                                    <i class="fas fa-link"></i> ربط شاهد جديد
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
             });
-
-            domHtml += `</div></div>`;
-            container.innerHTML += domHtml;
+            domHtml += `</div>`;
+            root.innerHTML += domHtml;
         });
-    }
 
-    function updateCharts() {
-        let total = 0, done = 0, kpiCount = 0;
-        state.domains.forEach(d => d.kpis.forEach(k => {
-            kpiCount++;
-            const t = k.tasks || [];
-            if (t.length && t.every(x => x.done)) done++;
-            const dCount = t.filter(x => x.done).length;
-            total += t.length ? (dCount/t.length)*100 : 0;
-        }));
-
-        const finalPerc = kpiCount ? Math.round(total/kpiCount) : 0;
-
-        // تحديث الصناديق
-        document.getElementById('statsBoxes').innerHTML = `
-            <div style="background:#dcfce7; padding:15px; border-radius:15px"><h3>${kpiCount}</h3><small>إجمالي المؤشرات</small></div>
-            <div style="background:#fef9c3; padding:15px; border-radius:15px"><h3>${finalPerc}%</h3><small>نسبة الإنجاز</small></div>
-            <div style="background:#fee2e2; padding:15px; border-radius:15px"><h3>${done}</h3><small>مؤشرات مكتملة</small></div>
-        `;
-
-        // تحديث الرسم البياني
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        if (myChart) myChart.destroy();
-        myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['منجز', 'متبقي'],
-                datasets: [{
-                    data: [finalPerc, 100 - finalPerc],
-                    backgroundColor: ['#059669', '#e2e8f0'],
-                    borderWidth: 0
-                }]
-            },
-            options: { cutout: '80%' }
-        });
-    }
+        document.getElementById('total-perc').innerText = (stats.total ? Math.round(stats.sum/stats.total) : 0) + '%';
+        document.getElementById('c-done').innerText = stats.done;
+        document.getElementById('c-work').innerText = stats.work;
+        document.getElementById('c-none').innerText = stats.none;
+    };
 </script>
 </body>
 </html>
