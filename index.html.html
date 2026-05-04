@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة التميز - مدرسة أسيد بن حضير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #0369a1; --success: #059669; --warning: #d97706; --danger: #dc2626; --bg: #f8fafc; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 100px; color: #334155; }
+        header { background: white; padding: 20px 8%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .dashboard { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; margin-bottom: 50px; }
+        .stat-card { background: white; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); text-align: center; border: 1px solid #e2e8f0; }
+        .stat-main-text { font-size: 3rem; font-weight: 900; color: var(--primary); line-height: 1; }
+        .sub-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .sub-stat-box { padding: 15px; border-radius: 20px; background: #fff; border: 1px solid #f1f5f9; }
+        .domain-wrapper { background: white; border-radius: 35px; padding: 35px; margin-bottom: 45px; border: 1px solid #e0f2fe; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .domain-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .domain-title { font-size: 1.5rem; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 12px; }
+        .kpi-item { background: white; border-radius: 20px; margin-bottom: 15px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .kpi-main { padding: 20px 25px; display: grid; grid-template-columns: 40px 1fr auto auto auto; align-items: center; gap: 20px; cursor: pointer; }
+        .kpi-details { padding: 0 25px 25px; display: none; border-top: 1px dashed #e2e8f0; background: #fafbfc; }
+        .status-badge { padding: 8px 16px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
+        .st-done { background: #d1fae5; color: #064e3b; }
+        .st-work { background: #fef3c7; color: #92400e; }
+        .st-none { background: #fee2e2; color: #991b1b; }
+        .progress-bar-bg { width: 120px; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; transition: 0.6s; }
+        .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 20px; }
+        .task-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
+        .task-card.active { border-color: var(--success); background: #ecfdf5; }
+        .btn { padding: 10px 24px; border-radius: 14px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: #f1f5f9; color: #475569; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1 style="margin:0; font-size:1.6rem; font-weight:900; color:var(--primary)">مدرسة أسيد بن حضير</h1>
+        <small><i class="fas fa-cloud-upload-alt"></i> نظام التقييم الذاتي المتصل سحابياً</small>
+    </div>
+    <button class="btn btn-primary" onclick="addDomain()"><i class="fas fa-folder-plus"></i> إضافة مجال تقييم</button>
+</header>
+
+<div class="container">
+    <div class="dashboard">
+        <div class="stat-card">
+            <div class="stat-main-text" id="total-perc">0%</div>
+            <p style="margin-top:10px; font-weight:700; color:#64748b">مستوى الأداء العام</p>
+        </div>
+        <div class="stat-card sub-stats">
+            <div class="sub-stat-box"><small>مؤشرات مكتملة</small><h2 id="c-done" style="color:var(--success); margin:5px 0">0</h2></div>
+            <div class="sub-stat-box"><small>جاري العمل</small><h2 id="c-work" style="color:var(--warning); margin:5px 0">0</h2></div>
+            <div class="sub-stat-box"><small>غير مكتملة</small><h2 id="c-none" style="color:var(--danger); margin:5px 0">0</h2></div>
+        </div>
+    </div>
+    <div id="app-root"></div>
+</div>
+
+<script type="module">
+    // استدعاء Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+    // بياناتك الخاصة من الصور السابقة
+    const firebaseConfig = {
+        apiKey: "AIzaSyAuD5HW9lusc4RuaHuVeiHC5YP4KMO5klo",
+        authDomain: "excellencegate-99f89.firebaseapp.com",
+        projectId: "excellencegate-99f89",
+        storageBucket: "excellencegate-99f89.firebasestorage.app",
+        messagingSenderId: "1031127698735",
+        appId: "1:1031127698735:web:04976917d5017d2b2265da",
+        databaseURL: "https://excellencegate-99f89-default-rtdb.firebaseio.com" // رابط القاعدة من صورتك الأخيرة
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'school_data');
+
+    // الحالة الافتراضية للتطبيق[cite: 1]
+    window.appState = { domains: [], expandedIds: [] };
+
+    // --- الربط مع السحابة ---
+    onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            window.appState = data;
+            render();
+        }
+    });
+
+    // --- دوال التحكم (Global) ---
+    window.save = function() {
+        set(dbRef, window.appState);
+    };
+
+    window.addDomain = function() {
+        const t = prompt("أدخل مسمى المجال:");
+        if (t) {
+            if (!window.appState.domains) window.appState.domains = [];
+            window.appState.domains.push({ title: t, kpis: [] });
+            save();
+        }
+    };
+
+    window.addKPI = function(dIdx) {
+        const n = prompt("أدخل مسمى المؤشر:");
+        if (n) {
+            if (!window.appState.domains[dIdx].kpis) window.appState.domains[dIdx].kpis = [];
+            window.appState.domains[dIdx].kpis.push({ name: n, tasks: [], manualStatus: null });
+            save();
+        }
+    };
+
+    window.addTask = function(dIdx, kIdx) {
+        const txt = prompt("أدخل المهمة المطلوبة:");
+        if (txt) {
+            if (!window.appState.domains[dIdx].kpis[kIdx].tasks) window.appState.domains[dIdx].kpis[kIdx].tasks = [];
+            window.appState.domains[dIdx].kpis[kIdx].tasks.push({ text: txt, done: false });
+            save();
+        }
+    };
+
+    window.toggleTask = function(dIdx, kIdx, tIdx) {
+        window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].done = !window.appState.domains[dIdx].kpis[kIdx].tasks[tIdx].done;
+        window.appState.domains[dIdx].kpis[kIdx].manualStatus = null;
+        save();
+    };
+
+    window.setStatus = function(dIdx, kIdx, status) {
+        window.appState.domains[dIdx].kpis[kIdx].manualStatus = status;
+        save();
+    };
+
+    window.toggleView = function(id) {
+        if (!window.appState.expandedIds) window.appState.expandedIds = [];
+        const index = window.appState.expandedIds.indexOf(id);
+        if (index > -1) window.appState.expandedIds.splice(index, 1);
+        else window.appState.expandedIds.push(id);
+        save();
+    };
+
+    window.deleteKPI = function(dIdx, kIdx) {
+        if(confirm('هل أنت متأكد من حذف هذا المؤشر؟')) {
+            window.appState.domains[dIdx].kpis.splice(kIdx, 1);
+            save();
+        }
+    }
+
+    // --- دالة الرسم (Render)[cite: 1] ---
+    window.render = function() {
+        const root = document.getElementById('app-root');
+        if (!root) return;
+        root.innerHTML = '';
+        let stats = { total: 0, sum: 0, done: 0, work: 0, none: 0 };
+
+        if (!window.appState.domains) return;
+
+        window.appState.domains.forEach((dom, dIdx) => {
+            let html = `
+                <div class="domain-wrapper">
+                    <div class="domain-header">
+                        <div class="domain-title"><i class="fas fa-layer-group"></i> ${dom.title}</div>
+                        <button class="btn btn-secondary" onclick="addKPI(${dIdx})">+ مؤشر جديد</button>
+                    </div>
+            `;
+
+            if (dom.kpis) {
+                dom.kpis.forEach((kpi, kIdx) => {
+                    stats.total++;
+                    const tasks = kpi.tasks || [];
+                    const tCount = tasks.length;
+                    const dCount = tasks.filter(t => t.done).length;
+                    const autoPerc = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
+                    
+                    let curStatus = kpi.manualStatus || (autoPerc === 100 ? 'done' : (autoPerc > 0 ? 'work' : 'none'));
+                    const finalPerc = curStatus === 'done' ? 100 : (curStatus === 'work' ? Math.max(autoPerc, 50) : 0);
+                    
+                    stats.sum += finalPerc;
+                    stats[curStatus]++;
+
+                    const kId = `k-${dIdx}-${kIdx}`;
+                    const isOpen = (window.appState.expandedIds || []).includes(kId);
+
+                    html += `
+                        <div class="kpi-item">
+                            <div class="kpi-main" onclick="toggleView('${kId}')">
+                                <i class="fas fa-chevron-${isOpen?'up':'down'}" style="color:#94a3b8"></i>
+                                <div style="font-weight:700;">${kpi.name}</div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" style="width:${autoPerc}%; background:${autoPerc===100?'var(--success)':'var(--primary)'}"></div>
+                                </div>
+                                <div style="font-weight:900; color:var(--primary)">${finalPerc}%</div>
+                                <div class="status-badge st-${curStatus}">
+                                    ${curStatus==='done'?'مكتملة':(curStatus==='work'?'جاري العمل':'غير مكتملة')}
+                                </div>
+                            </div>
+                            <div class="kpi-details" style="display:${isOpen?'block':'none'}">
+                                <div style="margin-top:20px; display:flex; gap:10px; align-items:center;">
+                                    <small style="font-weight:700">تغيير الحالة يدوياً:</small>
+                                    <button class="status-badge st-done" onclick="setStatus(${dIdx}, ${kIdx}, 'done')">مكتملة</button>
+                                    <button class="status-badge st-work" onclick="setStatus(${dIdx}, ${kIdx}, 'work')">جاري العمل</button>
+                                    <button class="status-badge st-none" onclick="setStatus(${dIdx}, ${kIdx}, 'none')">غير مكتملة</button>
+                                </div>
+                                <div class="tasks-grid">
+                                    ${tasks.map((t, tIdx) => `
+                                        <div class="task-card ${t.done?'active':''}" onclick="toggleTask(${dIdx}, ${kIdx}, ${tIdx})">
+                                            <i class="${t.done?'fas fa-check-circle':'far fa-circle'}"></i>
+                                            <span>${t.text}</span>
+                                        </div>
+                                    `).join('')}
+                                    <div class="task-card" style="border:1px dashed var(--primary); color:var(--primary); justify-content:center" onclick="addTask(${dIdx}, ${kIdx})">
+                                        <i class="fas fa-plus-circle"></i> إضافة مهمة
+                                    </div>
+                                </div>
+                                <button class="btn" style="color:var(--danger); margin-top:15px; font-size:0.7rem" onclick="deleteKPI(${dIdx},${kIdx})">حذف المؤشر</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            html += `</div>`;
+            root.innerHTML += html;
+        });
+
+        document.getElementById('total-perc').innerText = (stats.total ? Math.round(stats.sum / stats.total) : 0) + '%';
+        document.getElementById('c-done').innerText = stats.done;
+        document.getElementById('c-work').innerText = stats.work;
+        document.getElementById('c-none').innerText = stats.none;
+    }
+</script>
+</body>
+</html>
